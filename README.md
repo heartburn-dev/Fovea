@@ -35,7 +35,7 @@ This is loosely based on Jeremy Howard's FastAI Lesson 1 "Is it a bird?" classif
 
 Training data was collected **manually** by searching GitHub for known API key prefixes and taking screenshots in various contexts. Manual collection was chosen over automated scraping to ensure data quality and variety. Overall, I collected around 231 images of GitHub code pages, with different colour schemes set on my GitHub profile to simular differing terminal and background colours. This was a little bit of a drag, but I wanted to choose keys that legitimately were keys being leaked, rather than relying on programatically trying to grab them. In an attempt to be clever, I ensured the key was always appearing in a different part of the image. I hoped this would avoid the model thinking that 'valid = key-looking-string-at-xyz-screen-coordinates'.
 
-**Valid class — keys targeted:**
+**Valid class (images with keys):**
 
 | Provider | Prefix |
 |----------|--------|
@@ -46,7 +46,7 @@ Training data was collected **manually** by searching GitHub for known API key p
 | GitHub | `ghp_`, `gho_` |
 | Stripe | `sk_live_`, `pk_live_` |
 
-**Invalid class — negative examples:**
+**Invalid class (images without keys):**
 For the invalid classes, I also use images of code, some with no secrets at all, but also some with various red herrings that I hoped would help the model differentiate between truly valid and fake example keys. This included the following: 
 
 - Code snippets with placeholder keys (`OPENAI_API_KEY=your-key-here`)
@@ -74,7 +74,6 @@ learn.fine_tune(30)
 - Epochs: 10
 - Augmentation: None (flipping/rotation would distort text)
 
-**Accuracy across seeds: 75–87%, averaging ~80%**
 
 The variance across random seeds indicates sensitivity to which images end up in the validation split, which is a function of dataset size (20% kept aside and used for validation).
 
@@ -88,7 +87,7 @@ One thing to note is that, as I mentioned before, I purposefully took training d
 
 If you look into the Jupyter notebook, at the very end, you will see a small initial test I ran on 5 screenshots (2 valid keys, 3 invalid keys). 
 
-On held-out screenshots from the same distribution as training data, the model performed well:
+On held-out screenshots from the same type of screenshots as training data, the model performed well:
 
 ```
 Result: valid
@@ -157,7 +156,7 @@ I was going to just leave Fovea and never share the world my lessons; but I'm tr
 
 ---
 
-## Why It Failed (The Interesting Part)
+## Why It Failed 
 
 Just a few thoughts on why I think it failed. I haven't spoken to anyone actually good at this stuff, so it's all hypothetical (#dyor). 
 
@@ -192,3 +191,4 @@ Collect training data from the actual deployment context. Rather than just scour
 
 It was a good learning experience, regardless of my pitiful end result. There's definitely room for improvement, though the adverserial benefits are, in my opinion, unrewarding for targeted attacks. Similar to 'lets find secrets in docker registry images', this would've been a 'wide net' cast to try and find valid secrets and improve security at scale. I'm not saying I won't come back to this concept; but I need to refine it and make the methodology more compatible with the task. For learning though, it was great. 
 
+Laters y'all, keep hacking
