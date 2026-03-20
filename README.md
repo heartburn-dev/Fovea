@@ -17,7 +17,7 @@ Tools like GitGuardian, truffleHog, and detect-secrets are excellent at scanning
 
 ## Hypothesis
 
-Given the distinctive prefix formats of modern AI API keys (`sk-proj-`, `sk-ant-api03-`, `sk-svcact-`, `hf_`, etc.), a relatively small training dataset of manually collected screenshots should be sufficient to fine-tune a pretrained vision model to recognise these patterns in arbitrary visual contexts. 
+Given the distinctive prefix formats of modern AI API keys (`sk-proj-`, `sk-ant-api03-`, `sk-svcacct-`, `hf_`, etc.), a relatively small training dataset of manually collected screenshots should be sufficient to fine-tune a pretrained vision model to recognise these patterns in arbitrary visual contexts. 
 
 In an age where everyone is suddenly an AI guru, selling courses and posting tutorials, I assume there's quite a few leaked keys floating in Youtube frames and Medium articles. If you're in security; you understand the risk. Many people fail to realise these are akin to passwords, though, and thus inadvertently leak them online. We've all seen those clips of streamers flashing up their cryptocurrency wallet's private key on a sticky pad desktop window. They're exactly the king of things I was aiming to catch. 
 
@@ -33,7 +33,7 @@ This is loosely based on Jeremy Howard's FastAI Lesson 1 "Is it a bird?" classif
 
 ### Training Data
 
-Training data was collected **manually** by searching GitHub for known API key prefixes and taking screenshots in various contexts. Manual collection was chosen over automated scraping to ensure data quality and variety. Overall, I collected around 231 images of GitHub code pages, with different colour schemes set on my GitHub profile to simular differing terminal and background colours. This was a little bit of a drag, but I wanted to choose keys that legitimately were keys being leaked, rather than relying on programatically trying to grab them. In an attempt to be clever, I ensured the key was always appearing in a different part of the image. I hoped this would avoid the model thinking that 'valid = key-looking-string-at-xyz-screen-coordinates'.
+Training data was collected **manually** by searching GitHub for known API key prefixes and taking screenshots in various contexts. Manual collection was chosen over automated scraping to ensure data quality and variety. Overall, I collected around 231 images of GitHub code pages, with different colour schemes set on my GitHub profile to similar differing terminal and background colours. This was a little bit of a drag, but I wanted to choose keys that legitimately were keys being leaked, rather than relying on programatically trying to grab them. In an attempt to be clever, I ensured the key was always appearing in a different part of the image. I hoped this would avoid the model thinking that 'valid = key-looking-string-at-xyz-screen-coordinates'.
 
 **Valid class (images with keys):**
 
@@ -58,11 +58,11 @@ For the invalid classes, I also use images of code, some with no secrets at all,
 
 **Data variety:** Screenshots were taken at varying zoom levels, window sizes, with different IDE themes (dark/light), from GitHub issues, READMEs, code files, and terminal output. This was intentional, as real-world leaks appear in many visual contexts.
 
-I have not included the training data, or the model here, as even though they were all sourced from GitHub repositories, it didn't feel right to expose a load of potentially valid keys. I didn't confirm if a key was valid, either, by making any API calls. This is irrelavent for the exercise, as I was fine-tuning the model on the appearance of valid keys, rather than whether they were active. Though, writing this out, that could be a cool extra validation step.
+I have not included the training data, or the model here, as even though they were all sourced from GitHub repositories, it didn't feel right to expose a load of potentially valid keys. I didn't confirm if a key was valid, either, by making any API calls. This is irrelevant for the exercise, as I was fine-tuning the model on the appearance of valid keys, rather than whether they were active. Though, writing this out, that could be a cool extra validation step.
 
 ### Training Configuration
 
-I ran tons of training blocks using the `DataBlocks` class with various seeds, validation set %'s, varying batch sizes, epochs, etc. until finding one that consistently reported aroundd an 85% accuracy rate. These were all run in Kaggle on a Jupyter notebook. The `fovea.ipynb` file has been included if you would like to review it. I have added comments into most blocks to show the results of each training run as well as some mental notes.
+I ran tons of training blocks using the `DataBlocks` class with various seeds, validation set %'s, varying batch sizes, epochs, etc. until finding one that consistently reported around an 85% accuracy rate. These were all run in Kaggle on a Jupyter notebook. The `fovea.ipynb` file has been included if you would like to review it. I have added comments into most blocks to show the results of each training run as well as some mental notes.
 
 ```python
 learn = vision_learner(dls, resnet34, pretrained=True, metrics=error_rate)
@@ -155,9 +155,9 @@ I then ran it against some random videos that were titled things like 'Set up yo
 
 So it wasn't terrible. It just wasn't behaving how I'd hoped the training would have resulted in: differentiating between a box that says 'API key' and a real key. Most importantly, I wasn't expecting it to flag so heavily on Damn Daniel. I can only hypothesise that the black borders on the image somewhat resemble a terminal. But I have no idea. 
 
-In an attempt to give the model more context about 'this absolutely is never a key' - I took 50 random unsplash photos and added them to a Kaggle dataset, then included these in a new training run as invalid data. Sadly, this didn't improve my results at all, and I rage quit for the day. 
+In an attempt to give the model more context about 'this absolutely is never a key' - I took 50 random unsplash photos and added them to a Kaggle dataset, then included these in a new training run as invalid data. Sadly, this didn't improve my results at all, and I shelved it for future experimentation. 
 
-I was going to just leave Fovea and never share the world my lessons; but I'm trying to learn more in public and accept that looking a bit dumb is part of the process. So here; the code sucks, the premise wasn't proven, but it's interesting nonetheless I think. In my defence, I am a hacker, not a ML/software engineer.
+I was going to just leave Fovea and never share the world my lessons; but I'm trying to learn more in public and accept that *things not working* is part of the process. So here we are; the premise wasn't proven, but it's interesting nonetheless I think. In my defence, I am a hacker, not a ML/software engineer ;-)
 
 ---
 
@@ -167,7 +167,7 @@ Just a few thoughts on why I think it failed. I haven't spoken to anyone actuall
 
 ### Distribution Shift
 
-The model was trained exclusively on GitHub screenshots. This means browser windows, terminals, code editors with consistent UI patterns, fonts, and colour schemes. It never saw real video frames during training, different fonts, hell even the font colours would've mostly been the same. I was hoping that it was going be fixing on shapes of letters in a correlating pattern, but that didn't seem to come through in the data.
+The model was trained exclusively on GitHub screenshots. This means browser windows, terminals, code editors with consistent UI patterns, fonts, and colour schemes. It never saw real video frames during training, different fonts, hell even the font colours would've mostly been the same. I was hoping that it was going be fixing on shapes of letters in a correlated pattern, but that didn't seem to come through in the data.
 
 When deployed against YouTube content, it encountered a completely different visual domain. The model had no reference for "this is definitely not code" and made confident guesses based on spurious visual patterns, potentially including black padding around video frames that structurally resembled training images. Ultimately, my invalid training data probably was just too close to my training data, and that was done to try and discern the invalid example keys from the valid leaked keys. I think we just needed more and more data to better help it learn what a valid key was, or maybe, I could have just focused on one specific API key type (rather than different providers).
 
@@ -187,13 +187,13 @@ When I was doing validation, I was using screenshots from the same source as tra
 Extract text from video frames using EasyOCR or Tesseract, then run regex patterns against extracted text. Simple, reliable, actually solves the problem. No ML required. Probably actually solves the problem better. But I was here to learn some ML, not mess with regex! Ultimately this is just something I could extend to Trufflehog or Noseyparker. 
 
 ### Option 2: Vision-Language Model
-Use a model (CLIP, GPT-4V) that understands both images and text semantics. Ask "does this image contain an API key?" rather than training a binary classifier. Probably faesible at a local level using a local model, but costly using APIs - especially for longer videos. Probably ok for scraping images from GH issues.
+Use a model (CLIP, GPT-4V) that understands both images and text semantics. Ask "does this image contain an API key?" rather than training a binary classifier. Probably feasible at a local level using a local model, but costly using APIs - especially for longer videos. Probably ok for scraping images from GH issues.
 
 ### Option 3: Better Training Data
 Collect training data from the actual deployment context. Rather than just scouring GitHub like a lunatic, I could have gotten real video frame captures, not GitHub screenshots. Including "person on screen", "terminal in video", "IDE in tutorial" as explicit negative examples would've potentially helped with the crazy incorrect results.
 
 ---
 
-It was a good learning experience, regardless of my pitiful end result. There's definitely room for improvement, though the adverserial benefits are, in my opinion, unrewarding for targeted attacks. Similar to 'lets find secrets in docker registry images', this would've been a 'wide net' cast to try and find valid secrets and improve security at scale. I'm not saying I won't come back to this concept; but I need to refine it and make the methodology more compatible with the task. For learning though, it was great. 
+It was a good learning experience, regardless of my inconclusive end result. There's definitely room for improvement, though the adversarial benefits are, in my opinion, unrewarding for targeted attacks. Similar to 'lets find secrets in docker registry images', this would've been a 'wide net' cast to try and find valid secrets and improve security at scale. I'm not saying I won't come back to this concept; but I need to refine it and make the methodology more compatible with the task. For learning though, it was great. 
 
 Laters y'all, keep hacking
