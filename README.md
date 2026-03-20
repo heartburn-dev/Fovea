@@ -69,11 +69,10 @@ learn = vision_learner(dls, resnet34, pretrained=True, metrics=error_rate)
 learn.fine_tune(30)
 ```
 
-- Image resize: 512px with padding
+- Image resize: 256-512px with padding
 - Batch size: 8
-- Epochs: 10
+- Epochs: 10-30
 - Augmentation: None (flipping/rotation would distort text)
-
 
 The variance across random seeds indicates sensitivity to which images end up in the validation split, which is a function of dataset size (20% kept aside and used for validation).
 
@@ -142,17 +141,23 @@ Priority: u=0
 
 ![valid secret 2](image-2.png)
 
-At this point, I was pretty pleased; there was ones it missed in the video, and when I lowered the threshold it got lots of junk that was just code. But at 95%, it got two of the leaks. Nice. 
+At this point, I was pretty pleased; there were keys it missed in the video, and when I lowered the threshold it got lots of junk that was just code. But at 95%, it got two of the leaks. Nice. 
 
-However, when running it against a few more videos, I realised that this was probably the most erratic secrets detector ever. If you were an early Vine user, you'd remember Damn Daniel. Well, Fovea vs a Damn Daniel frame:
+However, when running it against a few more videos, I realised that this was probably the most **erratic secrets detector ever**. 
+
+If you were an early Vine user, you'd remember Damn Daniel...
+
+Well, Fovea vs a Damn Daniel frame:
 
 ![invalid secret flagged as valid](image-3.png)
 
-I then ran it against some random videos that were 'set up your OpenAI API' and the like, each time it was flagging lots of junk, whilst also adding high confidence flags on pages where API keys were entered or obfuscated. So it wasn't terrible. It just wasn't behaving how I'd hoped the training would have resulted in: differnitating between a box that says 'API key' and a real key. Most importantly, I wasn't expecting it to flag so heavily on Damn Daniel. I can only hypothesise that the black borders on the image somewhat resemble a terminal. But I have no idea. 
+I then ran it against some random videos that were titled things like 'Set up your OpenAI API' and the like. Each time it was flagging lots of junk, whilst also adding high confidence flags on pages where API keys were entered or obfuscated. 
 
-In an attempt to give the model more context about 'this absolutely is never a key' - I took 100 random unsplash photos and added them to a Kaggle dataset, then included these in a new training run as invalid data. Sadly, this didn't improve my results at all, and I rage quit for the day. 
+So it wasn't terrible. It just wasn't behaving how I'd hoped the training would have resulted in: differentiating between a box that says 'API key' and a real key. Most importantly, I wasn't expecting it to flag so heavily on Damn Daniel. I can only hypothesise that the black borders on the image somewhat resemble a terminal. But I have no idea. 
 
-I was going to just leave Fovea and never share the world my lessons; but I'm trying to learn more in public and accept that looking stupid is part of the process. So here; the code sucks, the premise wasn't proven, but it's interesting nonetheless I think.
+In an attempt to give the model more context about 'this absolutely is never a key' - I took 50 random unsplash photos and added them to a Kaggle dataset, then included these in a new training run as invalid data. Sadly, this didn't improve my results at all, and I rage quit for the day. 
+
+I was going to just leave Fovea and never share the world my lessons; but I'm trying to learn more in public and accept that looking a bit dumb is part of the process. So here; the code sucks, the premise wasn't proven, but it's interesting nonetheless I think. In my defence, I am a hacker, not a ML/software engineer.
 
 ---
 
